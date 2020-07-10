@@ -31,7 +31,7 @@ class ComicBookCrawler(ComicBookCrawlerBase):
     SEARCH_UL_PATTERN = re.compile(r'<div class="comiclist">\s*<ul>(.*?)</ul>', re.S)
     SEARCH_LI_TAG_PATTERN = re.compile(r'<li>(.*?)</li>', re.S)
     SEARCH_DATA_PATTERN = re.compile(
-        r'<strong><a href="http://www.u17.com/comic/(\d+).html" target="_blank" class="u" title="(.*?)">')
+        r'<strong><a href="https?://www.u17.com/comic/(\d+).html" target="_blank" class="u" title="(.*?)">')
     SEARCH_COVER_IMAGE_URL_PATTERN = re.compile(r'<div class="cover">.*?<img src="(.*?)">')
 
     def __init__(self, comicid):
@@ -113,8 +113,7 @@ class ComicBookCrawler(ComicBookCrawlerBase):
         chapter_url = chapter_db[chapter_number].url
         html = self.get_html(chapter_url)
         image_config_str = self.IMAGE_CONFIG_PATTERN.search(html).group(1)
-        image_config_str = self.IMAGE_CONFIG_KEY_PATTERN.sub(r'"\1":', image_config_str)
-        data = json.loads(image_config_str.replace("'", '"'))
+        data = eval(image_config_str, type('js', (dict,), dict(__getitem__=lambda image_config_str, n: n))())
         title = data["chapter"]["name"]
         image_urls = []
         for k, v in data["image_list"].items():
